@@ -20,10 +20,10 @@ const App = () => {
     const canvasHeight = ref.current!.height;
     const maxLat = Math.max(...state.map(({ lat }) => lat));
     const minLat = Math.min(...state.map(({ lat }) => lat));
-    const latRatio = canvasWidth / (Math.round(((maxLat * 100) - (minLat * 100)) * 10000) / 100);
+    const xRatio = canvasWidth / (Math.round(((maxLat * 100) - (minLat * 100)) * 10000) / 100);
     const maxLng = Math.max(...state.map(({ lng }) => lng));
     const minLng = Math.min(...state.map(({ lng }) => lng));
-    const lngRatio = canvasHeight / (Math.round(((maxLng * 100) - (minLng * 100)) * 10000) / 100);
+    const yRatio = canvasHeight / (Math.round(((maxLng * 100) - (minLng * 100)) * 10000) / 100);
 
     const context = ref.current!.getContext("2d")!;
     const positions = state.map(({ lat, lng }) => ({
@@ -35,7 +35,7 @@ const App = () => {
     context.moveTo(positions[0].x, positions[0].y);
     context.beginPath();
     for (const { x, y } of positions.slice(1)) {
-      context.lineTo(x * latRatio, y * lngRatio);
+      context.lineTo(x * xRatio, y * yRatio);
     }
 
     context.strokeStyle = "#999";
