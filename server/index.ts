@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket, MessageEvent } from "ws";
 import { Event, HelloEvent } from "types";
 
-class Server {
+class App {
   wss: WebSocketServer;
   dataStreams: WebSocket[] = [];
   clients: WebSocket[] = [];
@@ -50,4 +50,4 @@ class Server {
   }
 }
 
-const server = new Server(8080);
+const app = new App(8080);
