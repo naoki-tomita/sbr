@@ -1,4 +1,5 @@
 import { WebSocket } from "ws";
+import { Position, HelloEvent, InitializeEvent, PositionEvent } from "types";
 
 const data: [number, number, number][] = [
   [139.756058,35.676502,17],
@@ -931,11 +932,33 @@ async function main() {
   const ws = new WebSocket("ws://localhost:8080");
 
   ws.on("open", async () => {
-    ws.send(JSON.stringify({ type: "manager" }));
-
-    for (const [lat, lng, alt] of data) {
-
-      ws.send(JSON.stringify({ lat, lng, alt }));
+    ws.send(JSON.stringify({ type: "hello", name: "manager" } as HelloEvent));
+    ws.send(JSON.stringify({
+      type: "initialize",
+      center: {
+        lng: data.map(([lng]) => lng).reduce((sum, lng) => sum + lng, 0) / data.length,
+        lat: data.map(([_, lat]) => lat).reduce((sum, lat) => sum + lat, 0) / data.length,
+        alt: data.map(([_, __, alt]) => alt).reduce((sum, alt) => sum + alt, 0) / data.length,
+      },
+      max: {
+        lng: Math.max(...data.map(([lng]) => lng)),
+        lat: Math.max(...data.map(([_, lat]) => lat)),
+        alt: Math.max(...data.map(([_, __, alt]) => alt)),
+      },
+      min: {
+        lng: Math.min(...data.map(([lng]) => lng)),
+        lat: Math.min(...data.map(([_, lat]) => lat)),
+        alt: Math.min(...data.map(([_, __, alt]) => alt)),
+      }
+    } as InitializeEvent))
+    for (const [lng, lat, alt] of data) {
+      ws.send(JSON.stringify({
+        type: "position",
+        at: Date.now(),
+        lng,
+        lat,
+        alt
+      } as PositionEvent));
       await sleep(30);
     }
     ws.close();

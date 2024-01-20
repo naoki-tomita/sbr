@@ -5,7 +5,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/ws": "^8.5.10",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "types": "1.0.0"
   },
   "dependencies": {
     "esbuild": "^0.19.11",

@@ -3,7 +3,8 @@
   "workspaces": [
     "server",
     "client",
-    "data-generator"
+    "data-generator",
+    "types"
   ],
   "scripts": {
     "dev": "run-p dev:*",
