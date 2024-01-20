@@ -928,25 +928,14 @@ async function sleep(timeoutMs: number) {
 }
 
 async function main() {
-  const canvasWidth = 1000;
-  const canvasHeight = 1000;
-  // ほんとはここでは座標を送りたいが、本物の座標データは雑アプリでは扱いづらいのでx, y, z座標に適当に変換する。適当に変換できるのはここしかない。
-  const maxLat = Math.max(...data.map(([lat]) => lat));
-  const minLat = Math.min(...data.map(([lat]) => lat));
-  const latRatio = canvasWidth / (Math.round(((maxLat * 100) - (minLat * 100)) * 10000) / 100);
-  const maxLng = Math.max(...data.map(([_, lng]) => lng));
-  const minLng = Math.min(...data.map(([_, lng]) => lng));
-  const lngRatio = canvasHeight / (Math.round(((maxLng * 100) - (minLng * 100)) * 10000) / 100);
   const ws = new WebSocket("ws://localhost:8080");
 
   ws.on("open", async () => {
     ws.send(JSON.stringify({ type: "manager" }));
 
     for (const [lat, lng, alt] of data) {
-      const x = Math.round(((lat * 100) - (minLat * 100)) * 10000) / 100;
-      const y = Math.round(((lng * 100) - (minLng * 100)) * 10000) / 100;
-      ws.send(JSON.stringify({ x: x * latRatio, y: y * lngRatio }));
-      console.log(x, y);
+
+      ws.send(JSON.stringify({ lat, lng, alt }));
       await sleep(30);
     }
     ws.close();

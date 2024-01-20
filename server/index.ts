@@ -21,4 +21,4 @@ server.on("connection", (con) => {
   };
 });
 
-server.on("listening", () => console.log("listening!"));
+server.on("listening", () => console.log("Server ready."));
