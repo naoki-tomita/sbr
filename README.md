@@ -4,7 +4,7 @@
 * server: send coordinate to *client*.
 
 Sample data was borrowed from [this site](http://www.ic.daito.ac.jp/~mizutani/gps/gps_visualizer.html).
-![drawnimage.png](drawnimage.png)
+![drawnimage.png](animation.gif)
 
 ## getting started
 #### run server

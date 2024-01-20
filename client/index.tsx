@@ -74,8 +74,9 @@ const MapController = () => {
       map.flyToBounds(
         new LatLngBounds(
           new LatLng(e.min.lat, e.min.lng, e.min.alt),
-          new LatLng(e.max.lat, e.min.lng, e.max.lng),
-        )
+          new LatLng(e.max.lat, e.max.lng, e.max.lng),
+        ),
+        { animate: true, maxZoom: 40 }
       );
     });
     ds.onPosition(({ lat, lng, alt }) => addPosition({ lat, lng, alt }));
