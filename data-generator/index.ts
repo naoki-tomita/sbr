@@ -932,14 +932,9 @@ async function main() {
   const ws = new WebSocket("ws://localhost:8080");
 
   ws.on("open", async () => {
-    ws.send(JSON.stringify({ type: "hello", name: "manager" } as HelloEvent));
+    ws.send(JSON.stringify({ type: "hello", name: "data-stream" } as HelloEvent));
     ws.send(JSON.stringify({
       type: "initialize",
-      center: {
-        lng: data.map(([lng]) => lng).reduce((sum, lng) => sum + lng, 0) / data.length,
-        lat: data.map(([_, lat]) => lat).reduce((sum, lat) => sum + lat, 0) / data.length,
-        alt: data.map(([_, __, alt]) => alt).reduce((sum, alt) => sum + alt, 0) / data.length,
-      },
       max: {
         lng: Math.max(...data.map(([lng]) => lng)),
         lat: Math.max(...data.map(([_, lat]) => lat)),

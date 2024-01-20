@@ -1,15 +1,16 @@
 import { LatLng, LatLngBounds } from "leaflet";
-import React, { FC, ReactElement, createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { MapContainer, TileLayer, useMap, Polyline } from "react-leaflet";
-import { Event, InitializeEvent, Position, PositionEvent } from "types";
+import { Event, InitializeEvent, PositionEvent } from "types";
+import { PositionHistoryProvider, usePositionHistory } from "./PositionHistoryHooks";
 
 class DataStream {
   ws: WebSocket;
   constructor(host: string, port: number) {
     this.ws = new WebSocket(`ws://${host}:${port}`);
     this.ws.onmessage = (e) => this.messageHandler(JSON.parse(e.data));
-    this.ws.onopen = () => this.ws.send(JSON.stringify({ type: "hello", name: "app" }));
+    this.ws.onopen = () => this.ws.send(JSON.stringify({ type: "hello", name: "client" }));
   }
 
   private messageHandler(e: Event) {
@@ -38,30 +39,6 @@ class DataStream {
   close() {
     return this.ws.close();
   }
-}
-
-const PositionHistoryContext = createContext<ReturnType<typeof usePositionHistoryOriginal>>({} as any);
-
-const PositionHistoryProvider: FC<{ children: ReactElement | ReactElement[] }> = ({ children }) => {
-  const value = usePositionHistoryOriginal();
-  return <PositionHistoryContext.Provider value={value} >{children}</PositionHistoryContext.Provider>
-}
-
-function usePositionHistoryOriginal() {
-  const [positions, setPositions] = useState<Position[]>([]);
-  return {
-    positions,
-    addPosition(position: Position) {
-      setPositions(s => [...s, position]);
-    },
-    resetPositions() {
-      setPositions([]);
-    }
-  }
-}
-
-function usePositionHistory() {
-  return useContext(PositionHistoryContext);
 }
 
 const MapController = () => {

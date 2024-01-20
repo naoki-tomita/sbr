@@ -1,29 +1,53 @@
-import { WebSocketServer, WebSocket } from "ws";
-import { Event } from "types";
+import { WebSocketServer, WebSocket, MessageEvent } from "ws";
+import { Event, HelloEvent } from "types";
 
-const server = new WebSocketServer({ port: 8080 });
-let manager: WebSocket | null;
-let app: WebSocket | null;
-server.on("connection", (con) => {
-  con.onmessage = (e) => {
-    const event: Event = JSON.parse(e.data.toString("utf-8"));
-    switch (event.type) {
-      case "hello": {
-        if (event.name === "manager") {
-          console.log("connected to manager")
-          manager = con;
-        } else {
-          console.log("connected to app")
-          app = con;
-        }
-        break;
+class Server {
+  wss: WebSocketServer;
+  dataStreams: WebSocket[] = [];
+  clients: WebSocket[] = [];
+
+  constructor(port: number) {
+    this.wss = new WebSocketServer({ port });
+    this.wss.on("connection", this.handleConnection.bind(this));
+    this.wss.on("listening", () => console.log("Listening..."));
+  }
+
+  handleConnection(ws: WebSocket) {
+    console.log("Connecting...")
+    ws.onmessage = (e) => {
+      const event: HelloEvent = JSON.parse(e.data.toString("utf-8"));
+      if (event.type !== "hello") return;
+      if (event.name === "data-stream") {
+        ws.onmessage = this.handleDataStreamMessage.bind(this);
+        this.dataStreams.push(ws);
+      } else if (event.name === "client") {
+        ws.onmessage = this.handleClientMessage.bind(this);
+        this.clients.push(ws);
       }
-      default: {
-        console.log("send data to app", event);
-        app?.send(JSON.stringify(event));
-      }
+      console.log("Connected!", event.name);
     }
-  };
-});
+    ws.onclose = () => {
+      console.log("Disconnecting...");
+      this.clients = this.clients.filter(it => it !== ws);
+      this.dataStreams.filter(it => it !== ws);
+    }
+  }
 
-server.on("listening", () => console.log("Server ready."));
+  handleDataStreamMessage(e: MessageEvent) {
+    const data = e.data.toString("utf-8");
+    console.log(`DataStream -> Incomming message`, data);
+    const event: Event = JSON.parse(data);
+    this.broadcast(event);
+  }
+
+  handleClientMessage(e: MessageEvent) {
+    // do nothing
+  }
+
+  broadcast(e: Event) {
+    console.log(`Broadcast message -> Client`, this.clients.length);
+    this.clients.forEach(it => it.send(JSON.stringify(e)))
+  }
+}
+
+const server = new Server(8080);
