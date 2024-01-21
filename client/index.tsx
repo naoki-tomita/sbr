@@ -1,7 +1,7 @@
 import { LatLng, LatLngBounds } from "leaflet";
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { MapContainer, TileLayer, useMap, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, Marker } from "react-leaflet";
 import { Event, InitializeEvent, PositionEvent } from "types";
 import { PositionHistoryProvider, usePositionHistory } from "./PositionHistoryHooks";
 
@@ -46,17 +46,8 @@ const MapController = () => {
   const { addPosition, resetPositions } = usePositionHistory();
   useEffect(() => {
     const ds = new DataStream("localhost", 8080);
-    ds.onInitialize((e) => {
-      resetPositions();
-      map.flyToBounds(
-        new LatLngBounds(
-          new LatLng(e.min.lat, e.min.lng, e.min.alt),
-          new LatLng(e.max.lat, e.max.lng, e.max.lng),
-        ),
-        { animate: true, maxZoom: 40 }
-      );
-    });
-    ds.onPosition(({ lat, lng, alt }) => addPosition({ lat, lng, alt }));
+    ds.onInitialize(() => resetPositions());
+    ds.onPosition(({ id, lat, lng, alt }) => addPosition(id, { lat, lng, alt }));
     return () => ds.close();
   }, []);
   return null;
@@ -74,10 +65,12 @@ const App = () => {
       zoom={13}
       scrollWheelZoom={true}
     >
-      <Polyline
-        positions={positions.map(({ lat, lng, alt }) => new LatLng(lat, lng, alt))}
-        color="#f00"
-      />
+      {Object.entries(positions).map(([id, positions]) =>
+        <Marker
+          key={id}
+          position={new LatLng(positions.at(-1)!.lat, positions.at(-1)!.lng, positions.at(-1)!.alt)}
+          title={id}
+        />)}
       <MapController />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

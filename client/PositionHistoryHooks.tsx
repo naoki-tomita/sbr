@@ -6,15 +6,23 @@ export const PositionHistoryProvider: FC<{ children: ReactElement | ReactElement
   const value = usePositionHistoryOriginal();
   return <PositionHistoryContext.Provider value={value} >{children}</PositionHistoryContext.Provider>
 }
+
+type Positions = {
+  [id: string]: Position[];
+}
+
 function usePositionHistoryOriginal() {
-  const [positions, setPositions] = useState<Position[]>([]);
+  const [positions, setPositions] = useState<Positions>({});
   return {
     positions,
-    addPosition(position: Position) {
-      setPositions(s => [...s, position]);
+    addPosition(id: string, position: Position) {
+      setPositions(s => ({
+        ...s,
+        [id]: [...s[id] ?? [], position],
+      }));
     },
     resetPositions() {
-      setPositions([]);
+      setPositions({});
     }
   }
 }
